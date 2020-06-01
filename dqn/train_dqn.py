@@ -12,6 +12,7 @@ from copy import deepcopy
 from os import path
 import math
 
+
 class ReplayBuffer:
     """
     A simple FIFO experience replay buffer for DDPG agents.
