@@ -72,6 +72,7 @@ def dqn_algo(env_name='CartPole-v1', device='cpu',
     start_time = time.time()
     PATH = save_path + 'dqn_' + 'cuda' + '.pt' if device is not 'cpu' else save_path + 'dqn_cpu.pt'
     obs, ep_ret, ep_len = env.reset(), 0, 0
+    x = encoder(obs)
     epsilon = epsilon_start
 
     '''
@@ -116,7 +117,7 @@ def dqn_algo(env_name='CartPole-v1', device='cpu',
 
         # Store experience to replay buffer
         # replay_buffer.store(obs, a, r, obs_next, d)
-        replay_buffer.store(obs, a, r, x_next, d)
+        replay_buffer.store(x, a, r, x_next, d)
 
         # obs = obs_next
         x = x_next
