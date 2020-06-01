@@ -59,7 +59,7 @@ def dqn_algo(env_name='CartPole-v1', device='cpu',
     env = gym.make(env_name)
 
     obs_dim = 6
-    act_dim = 1
+    act_dim = 2
 
     act_mesh = torch.tensor([[0], [1]], dtype=torch.float)
 
@@ -126,6 +126,7 @@ def dqn_algo(env_name='CartPole-v1', device='cpu',
         if d or (ep_len == max_ep_len):
             # obs, ep_ret, ep_len = env.reset(), 0, 0
             obs = env.reset()
+            x = encoder(obs)
             traj_ret.append(ep_ret)
             ep_ret = 0
 
@@ -146,9 +147,6 @@ def dqn_algo(env_name='CartPole-v1', device='cpu',
             if epoch % target_freq == 0:
                 ag.Q_targ.load_state_dict(ag.Q.state_dict())
                 # ag.Q_targ.eval()
-
-            # Test the performance of the deterministic version of the agent.
-            # ag.test_agent(env_test)
 
             EP_ret.append(np.average(traj_ret))
             ax.plot(EP_ret, 'b')

@@ -14,17 +14,18 @@ class dqnAgent:
 
         def __init__(self, obs_dim, act_dim, device='cpu'):
             super().__init__()
-            self.layer1 = torch.nn.Linear(obs_dim + act_dim, 64)
+            self.layer1 = torch.nn.Linear(obs_dim, 64)
             self.layer2 = torch.nn.Linear(64, 64)
             self.layer3 = torch.nn.Linear(64, 64)
-            self.layer4 = torch.nn.Linear(64, 1)
+            self.layer4 = torch.nn.Linear(64, act_dim)
             self.device = device
 
-        def forward(self, obs, act):
+        def forward(self, obs):
             if not self.device == 'cpu':
                 obs = obs.cuda()
-                act = act.cuda()
-            out1 = Function.relu(self.layer1(torch.cat([obs, act], dim=-1)))
+                # act = act.cuda()
+            # out1 = Function.relu(self.layer1(torch.cat([obs, act], dim=-1)))
+            out1 = Function.relu(self.layer1(obs))
             out2 = Function.relu(self.layer2(out1))
             out3 = Function.relu(self.layer3(out2))
             qvalue = self.layer4(out3)
@@ -60,14 +61,16 @@ class dqnAgent:
         obs = torch.from_numpy(obs).float()
         obs = obs.to(self.device)
 
-        qBest = - np.inf
-        aBest = self.act_mesh[0]
-        with torch.no_grad():
-            for a in self.act_mesh:
-                q = self.Q(obs, a).detach()
-                q = q.cpu().numpy()
-                qBest = q if q >= qBest else qBest
-                aBest = a if q >= qBest else aBest
+        # qBest = - np.inf
+        # aBest = self.act_mesh[0]
+        # with torch.no_grad():
+        #     for a in self.act_mesh:
+        #         q = self.Q(obs, a).detach()
+        #         q = q.cpu().numpy()
+        #         qBest = q if q >= qBest else qBest
+        #         aBest = a if q >= qBest else aBest
+        q_list = self.Q(obs).detach().cpu().numpy()
+        aBest = np.argmax(q_list)
         return aBest
 
     def update(self, batch):
@@ -83,16 +86,19 @@ class dqnAgent:
         obs, a, obs_next = obs.to(self.device), a.to(self.device), obs_next.to(self.device)
         r, done = r.to(self.device), done.to(self.device)
 
-        q = self.Q(obs, a).flatten()
+        act = a[:, 0].long()
+        q = self.Q(obs).gather(1, act.view(-1, 1)).flatten()
 
         with torch.no_grad():
-            batch_size, _ = obs.shape
-            q_targ = - np.inf * torch.ones(batch_size).view(-1, 1).to(self.device)
-            for act in self.act_mesh:
-                act = act * torch.ones(batch_size).view(-1, 1)
-                q_ = self.Q_targ(obs, act)
-                q_targ[q_ > q_targ] = q_[q_ > q_targ]
+            # batch_size, _ = obs.shape
+            # q_targ = - np.inf * torch.ones(batch_size).view(-1, 1).to(self.device)
+            # for act in self.act_mesh:
+            #     act = act * torch.ones(batch_size).view(-1, 1)
+            #     q_ = self.Q_targ(obs, act)
+            #     q_targ[q_ > q_targ] = q_[q_ > q_targ]
 
+            # y = r + self.gamma * (1 - done) * q_targ.flatten()
+            q_targ = self.Q_targ(obs).max(1)[0].detach()
             y = r + self.gamma * (1 - done) * q_targ.flatten()
 
         loss = Function.mse_loss(q, y)
