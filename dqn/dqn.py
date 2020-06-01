@@ -23,19 +23,16 @@ class dqnAgent:
         def forward(self, obs):
             if not self.device == 'cpu':
                 obs = obs.cuda()
-                # act = act.cuda()
-            # out1 = Function.relu(self.layer1(torch.cat([obs, act], dim=-1)))
             out1 = Function.relu(self.layer1(obs))
             out2 = Function.relu(self.layer2(out1))
             out3 = Function.relu(self.layer3(out2))
             qvalue = self.layer4(out3)
             return qvalue
 
-    def __init__(self, obs_dim, act_dim, act_mesh, device, gamma):
+    def __init__(self, obs_dim, act_dim, device, gamma):
 
         self.obs_dim = obs_dim
         self.act_dim = act_dim
-        self.act_mesh = act_mesh
 
         self.Q = self.MLPQFunction(obs_dim, act_dim, device=device)
         self.Q_targ = self.MLPQFunction(obs_dim, act_dim, device=device)
@@ -55,20 +52,9 @@ class dqnAgent:
             self.Q.cuda()
             self.Q_targ.cuda()
 
-        return
-
     def action(self, obs):
         obs = torch.from_numpy(obs).float()
         obs = obs.to(self.device)
-
-        # qBest = - np.inf
-        # aBest = self.act_mesh[0]
-        # with torch.no_grad():
-        #     for a in self.act_mesh:
-        #         q = self.Q(obs, a).detach()
-        #         q = q.cpu().numpy()
-        #         qBest = q if q >= qBest else qBest
-        #         aBest = a if q >= qBest else aBest
         q_list = self.Q(obs).detach().cpu().numpy()
         aBest = np.argmax(q_list)
         return aBest
@@ -80,29 +66,16 @@ class dqnAgent:
         self.Q_optimizer.step()
 
     def compute_loss(self, batch):
-
         obs, a, r, obs_next, done = batch['obs'], batch['act'], batch['rew'], batch['obs2'], batch['done']
-
         obs, a, obs_next = obs.to(self.device), a.to(self.device), obs_next.to(self.device)
         r, done = r.to(self.device), done.to(self.device)
 
-        act = a[:, 0].long()
-        q = self.Q(obs).gather(1, act.view(-1, 1)).flatten()
+        q = self.Q(obs).gather(1, a.long().view(-1, 1)).flatten()
 
         with torch.no_grad():
-            # batch_size, _ = obs.shape
-            # q_targ = - np.inf * torch.ones(batch_size).view(-1, 1).to(self.device)
-            # for act in self.act_mesh:
-            #     act = act * torch.ones(batch_size).view(-1, 1)
-            #     q_ = self.Q_targ(obs, act)
-            #     q_targ[q_ > q_targ] = q_[q_ > q_targ]
-
-            # y = r + self.gamma * (1 - done) * q_targ.flatten()
             q_targ = self.Q_targ(obs).max(1)[0].detach()
             y = r + self.gamma * (1 - done) * q_targ.flatten()
 
         loss = Function.mse_loss(q, y)
-        # loss = ((q - y) ** 2).mean()
         loss_info = dict(Qvals=q.detach().cpu().numpy())
-
         return loss, loss_info

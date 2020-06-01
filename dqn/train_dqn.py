@@ -61,16 +61,14 @@ def dqn_algo(env_name='CartPole-v1', device='cpu',
     obs_dim = 6
     act_dim = 2
 
-    act_mesh = torch.tensor([[0], [1]], dtype=torch.float)
+    ag = dqnAgent(obs_dim, act_dim, device, gamma)
 
-    ag = dqnAgent(obs_dim, act_dim, act_mesh, device, gamma)
-
-    replay_buffer = ReplayBuffer(obs_dim=obs_dim, act_dim=act_dim, size=replay_size)
+    replay_buffer = ReplayBuffer(obs_dim=obs_dim, act_dim=1, size=replay_size)
 
     # Prepare for interaction with environment
     total_steps = steps_per_epoch * epochs
     start_time = time.time()
-    PATH = save_path + 'dqn_' + 'cuda' + '.pt' if device is not 'cpu' else save_path + 'dqn_cpu.pt'
+    PATH = save_path + 'dqn_cuda.pt' if device is not 'cpu' else save_path + 'dqn_cpu.pt'
     obs, ep_ret, ep_len = env.reset(), 0, 0
     x = encoder(obs)
     epsilon = epsilon_start
@@ -84,8 +82,7 @@ def dqn_algo(env_name='CartPole-v1', device='cpu',
         ag.Q_targ.eval()
     '''
 
-    EP_ret = []
-    traj_ret = []
+    EP_ret, traj_ret = [], []
 
     fig, ax = plt.subplots()
     ax.set_title('Agent Returns of the epoch.')
