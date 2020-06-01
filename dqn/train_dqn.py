@@ -49,7 +49,7 @@ def encoder(obs):
     cart_position, cart_vel, pole_ang, pole_vel = obs
     pole_x_vel = np.sign(pole_ang) * np.cos(pole_ang) * pole_vel
     pole_y_vel = - np.sin(pole_ang) * pole_vel
-    return np.array(cart_position, cart_vel, pole_ang, pole_vel, pole_x_vel, pole_y_vel)
+    return np.array([cart_position, cart_vel, pole_ang, pole_vel, pole_x_vel, pole_y_vel])
 
 
 def dqn_algo(env_name='CartPole-v1', device='cpu',
@@ -58,7 +58,7 @@ def dqn_algo(env_name='CartPole-v1', device='cpu',
              gamma=0.99, epsilon_start=0.9, epsilon_final=0.1, save_freq=5, save_path='model/'):
     env = gym.make(env_name)
 
-    obs_dim = 4
+    obs_dim = 6
     act_dim = 1
 
     act_mesh = torch.tensor([[0], [1]], dtype=torch.float)
@@ -99,13 +99,14 @@ def dqn_algo(env_name='CartPole-v1', device='cpu',
             if np.random.uniform(0, 1) < epsilon:
                 a = env.action_space.sample()
             else:
-                a = int(ag.action(obs))
+                # a = int(ag.action(obs))
+                a = int(ag.action(x))
         else:
             a = env.action_space.sample()
 
         # Execute a in the environment.
         obs_next, r, d, info = env.step(a)
-        # x_next = encoder(obs_next)
+        x_next = encoder(obs_next)
 
         ep_ret = ep_ret + r
         # ep_len = ep_len + 1
@@ -114,11 +115,11 @@ def dqn_algo(env_name='CartPole-v1', device='cpu',
         # d = False if ep_len == max_ep_len else d
 
         # Store experience to replay buffer
-        replay_buffer.store(obs, a, r, obs_next, d)
+        # replay_buffer.store(obs, a, r, obs_next, d)
+        replay_buffer.store(obs, a, r, x_next, d)
 
-        # replay_buffer.store(obs, a, r, x_next, d)
-
-        obs = obs_next
+        # obs = obs_next
+        x = x_next
 
         # End of trajectory
         if d or (ep_len == max_ep_len):

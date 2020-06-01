@@ -14,10 +14,10 @@ class dqnAgent:
 
         def __init__(self, obs_dim, act_dim, device='cpu'):
             super().__init__()
-            self.layer1 = torch.nn.Linear(obs_dim + act_dim, 16)
-            self.layer2 = torch.nn.Linear(16, 16)
-            self.layer3 = torch.nn.Linear(16, 16)
-            self.layer4 = torch.nn.Linear(16, 1)
+            self.layer1 = torch.nn.Linear(obs_dim + act_dim, 64)
+            self.layer2 = torch.nn.Linear(64, 64)
+            self.layer3 = torch.nn.Linear(64, 64)
+            self.layer4 = torch.nn.Linear(64, 1)
             self.device = device
 
         def forward(self, obs, act):
