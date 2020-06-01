@@ -70,7 +70,7 @@ def dqn_algo(env_name='CartPole-v1', device='cpu',
     # Prepare for interaction with environment
     total_steps = steps_per_epoch * epochs
     start_time = time.time()
-    PATH = save_path + 'dqn_' + device + '.pt'
+    PATH = save_path + 'dqn_' + 'cuda' + '.pt' if device is not 'cpu' else save_path + 'dqn_cpu.pt'
     obs, ep_ret, ep_len = env.reset(), 0, 0
     epsilon = epsilon_start
 

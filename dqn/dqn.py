@@ -36,8 +36,8 @@ class dqnAgent:
         self.act_dim = act_dim
         self.act_mesh = act_mesh
 
-        self.Q = self.MLPQFunction(obs_dim, act_dim)
-        self.Q_targ = self.MLPQFunction(obs_dim, act_dim)
+        self.Q = self.MLPQFunction(obs_dim, act_dim, device=device)
+        self.Q_targ = self.MLPQFunction(obs_dim, act_dim, device=device)
 
         self.Q_targ.load_state_dict(self.Q.state_dict())
         self.Q_targ.eval()
@@ -83,11 +83,11 @@ class dqnAgent:
         obs, a, obs_next = obs.to(self.device), a.to(self.device), obs_next.to(self.device)
         r, done = r.to(self.device), done.to(self.device)
 
-        q = self.Q(obs, a)
+        q = self.Q(obs, a).flatten()
 
         with torch.no_grad():
             batch_size, _ = obs.shape
-            q_targ = - np.inf * torch.ones(batch_size).view(-1, 1)
+            q_targ = - np.inf * torch.ones(batch_size).view(-1, 1).to(self.device)
             for act in self.act_mesh:
                 act = act * torch.ones(batch_size).view(-1, 1)
                 q_ = self.Q_targ(obs, act)
