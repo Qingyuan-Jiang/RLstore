@@ -55,9 +55,11 @@ class dqnAgent:
     def action(self, obs):
         obs = torch.from_numpy(obs).float()
         obs = obs.to(self.device)
-        q_list = self.Q(obs).detach().cpu().numpy()
-        aBest = np.argmax(q_list)
-        return aBest
+        # q_list = self.Q(obs).detach().cpu().numpy()
+        # aBest = np.argmax(q_list)
+        q_list = self.Q(obs).detach().cpu()
+        act = q_list.max(0)[1]
+        return act.numpy()
 
     def update(self, batch):
         self.Q_optimizer.zero_grad()
