@@ -43,7 +43,7 @@ class dqnAgent:
         for q in self.Q_targ.parameters():
             q.requires_grad = False
 
-        self.Q_optimizer = Adam(self.Q.parameters(), lr=1e-4)
+        self.Q_optimizer = Adam(self.Q.parameters(), lr=1e-5)
 
         self.gamma = gamma
 
