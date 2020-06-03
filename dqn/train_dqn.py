@@ -151,7 +151,7 @@ def dqn_algo(env_name='CartPole-v1', device='cpu',
 
             traj_ret = []
 
-            epsilon = epsilon_final + math.exp(-1 * epoch / epochs) * (epsilon_start - epsilon_final)
+            epsilon = epsilon_final + math.exp(-1 * epoch / 100) * (epsilon_start - epsilon_final)
             # Log info about epoch
             print("##### Epoch: %i at step t: %i after time %i mins" % (epoch, t + 1, (time.time() - start_time) / 60))
     plt.show()
