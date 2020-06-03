@@ -55,13 +55,13 @@ def encoder(obs):
 def dqn_algo(env_name='CartPole-v1', device='cpu',
              steps_per_epoch=200, epochs=400, max_ep_len=500, replay_size=int(1e6), batch_size=100,
              start_steps=10000, update_after=200, update_every=50, target_freq=5,
-             gamma=0.99, epsilon_start=0.9, epsilon_final=0.1, save_freq=5, save_path='model/'):
+             lr=1e-3, gamma=0.99, epsilon_start=0.9, epsilon_final=0.1, save_freq=5, save_path='model/'):
     env = gym.make(env_name)
 
     obs_dim = 6
     act_dim = env.action_space.n
 
-    ag = dqnAgent(obs_dim, act_dim, device, gamma)
+    ag = dqnAgent(obs_dim, act_dim, device, lr, gamma)
 
     replay_buffer = ReplayBuffer(obs_dim=obs_dim, act_dim=1, size=replay_size)
 

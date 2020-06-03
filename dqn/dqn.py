@@ -29,7 +29,7 @@ class dqnAgent:
             qvalue = self.layer4(out3)
             return qvalue
 
-    def __init__(self, obs_dim, act_dim, device, gamma,
+    def __init__(self, obs_dim, act_dim, device, lr, gamma,
                  num_test_episodes=10, max_ep_len=1000):
 
         self.obs_dim = obs_dim
@@ -44,7 +44,7 @@ class dqnAgent:
         for q in self.Q_targ.parameters():
             q.requires_grad = False
 
-        self.Q_optimizer = Adam(self.Q.parameters(), lr=1e-5)
+        self.Q_optimizer = Adam(self.Q.parameters(), lr=lr)
 
         self.gamma = gamma
 
