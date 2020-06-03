@@ -13,8 +13,8 @@ from copy import deepcopy
 
 if __name__ == '__main__':
 
-    # device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    device = "cpu"
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    # device = "cpu"
 
     # Params
     replay_size = int(1e5)
