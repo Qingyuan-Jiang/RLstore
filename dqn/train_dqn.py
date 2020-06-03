@@ -59,7 +59,7 @@ def dqn_algo(env_name='CartPole-v1', device='cpu',
     env = gym.make(env_name)
 
     obs_dim = 6
-    act_dim = 2
+    act_dim = env.action_space.n
 
     ag = dqnAgent(obs_dim, act_dim, device, gamma)
 

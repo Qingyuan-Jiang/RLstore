@@ -29,7 +29,8 @@ class dqnAgent:
             qvalue = self.layer4(out3)
             return qvalue
 
-    def __init__(self, obs_dim, act_dim, device, gamma):
+    def __init__(self, obs_dim, act_dim, device, gamma,
+                 num_test_episodes=10, max_ep_len=1000):
 
         self.obs_dim = obs_dim
         self.act_dim = act_dim
@@ -51,6 +52,9 @@ class dqnAgent:
         if device != "cpu":
             self.Q.cuda()
             self.Q_targ.cuda()
+
+        self.num_test_episodes = num_test_episodes
+        self.max_ep_len = max_ep_len
 
     def action(self, obs):
         obs = torch.from_numpy(obs).float()
@@ -81,3 +85,19 @@ class dqnAgent:
         loss = Function.mse_loss(q, y)
         loss_info = dict(Qvals=q.detach().cpu().numpy())
         return loss, loss_info
+
+    def test_agent(self, test_env, render=False):
+        test_ret, test_len = [], []
+        for j in range(self.num_test_episodes):
+            o, d, ep_ret, ep_len = test_env.reset(), False, 0, 0
+            while not (d or (ep_len == self.max_ep_len)):
+                o, r, d, _ = test_env.step(self.action(o))
+                ep_ret += r
+                ep_len += 1
+                if render:
+                    test_env.render()
+            test_ret.append(ep_ret)
+            test_len.append(ep_len)
+        avg_ret = np.average(np.array(test_ret))
+        avg_len = np.average(np.array(test_len))
+        return avg_ret, avg_len
