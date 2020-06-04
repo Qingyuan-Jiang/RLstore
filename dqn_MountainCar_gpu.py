@@ -30,11 +30,10 @@ if __name__ == '__main__':
     target_freq = 5
     save_freq = 5
 
+    lr = 1e-3
     gamma = 0.99995
     epsilon_start = 0.8
     epsilon_final = 0.005
-
-    save_path = 'model/'
 
     env = gym.make('MountainCar-v0')
     env_test = deepcopy(env)
@@ -42,14 +41,19 @@ if __name__ == '__main__':
     obs_dim = env.observation_space.shape[0]
     act_dim = env.action_space.n
 
-    ag = dqnAgent(obs_dim, act_dim, device, gamma)
+    ag = dqnAgent(obs_dim, act_dim, device, lr, gamma)
 
     replay_buffer = ReplayBuffer(obs_dim=obs_dim, act_dim=1, size=replay_size)
 
     # Prepare for interaction with environment
     total_steps = steps_per_epoch * epochs
     start_time = time.time()
-    PATH = save_path + 'dqn_cuda.pt' if device is not 'cpu' else save_path + 'dqn_cpu.pt'
+
+    # save_path = 'model/'
+    # PATH = save_path + 'dqn_cuda.pt' if device is not 'cpu' else save_path + 'dqn_cpu.pt'
+
+    PATH = 'model/dqn_MountainCar_cuda.pt'
+
     obs, ep_ret, ep_len = env.reset(), 0, 0
     epsilon = epsilon_start
 
